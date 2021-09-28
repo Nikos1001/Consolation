@@ -32,9 +32,9 @@ int main() {
         if(timer == 0) {
             x += dirX;
             y += dirY;
-            if (x == 0 || x == window.cols - 1)
+            if (x <= 0 || x >= window.cols - 1)
                 dirX *= -1;
-            if (y == 0 || y == window.rows - 1)
+            if (y <= 0 || y >= window.rows - 1)
                 dirY *= -1;
         }
         timer++;
@@ -52,6 +52,12 @@ int main() {
                 consolation_setChar(&window, i, j, '#');
 
         consolation_renderWindow(&window);
+
+        if(glfwGetKey(window.window, GLFW_KEY_R)) {
+            consolation_setResolution(&window, 120, 60);
+        } else {
+            consolation_setResolution(&window, 60, 30);
+        }
 
     }
     consolation_freeWindow(&window);
