@@ -2,7 +2,7 @@
 #include "consolation.h"
 
 int main() {
-    consolation_init();
+    consolation_init("../res/");
     struct consolation_Window window;
     consolation_initWindow(&window, 60, 30, "Hey");
     uint8_t weight = 0;

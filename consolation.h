@@ -48,7 +48,7 @@ struct consolation_Window {
 
 static bool consolation_initializedGlew = false;
 
-void consolation_init();
+void consolation_init(const char* resPath);
 void consolation_updateFrame();
 void consolation_free();
 

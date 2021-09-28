@@ -1,7 +1,6 @@
 
 #include "consolation.h"
 #include "file.h"
-#include "font.h"
 #include <stdio.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -11,6 +10,8 @@
 #define CONSOLATION_GET_GREEN(color) ((float)((color & 0x00FF00) >> 8) / 255.0f)
 #define CONSOLATION_GET_BLUE(color) ((float)((color & 0x0000FF) >> 0) / 255.0f)
 
+static const char* consolation_resPath;
+
 static void* reallocate(void* data, size_t size) {
     if(size == 0) {
         free(data);
@@ -19,7 +20,8 @@ static void* reallocate(void* data, size_t size) {
     return realloc(data, size);
 }
 
-void consolation_init() {
+void consolation_init(const char* resPath) {
+    consolation_resPath = resPath;
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -78,47 +80,63 @@ static void initRendering(struct consolation_Window* window) {
     int success;
     char infoLog[512];
 
-    const char* vertSource = consolation_readFile("../res/vert.glsl");
+    size_t pathLen = strlen(consolation_resPath);
+    char* path = reallocate(NULL, pathLen + 10);
+    memcpy(path, consolation_resPath, pathLen);
+    char* filename = path + pathLen;
+    memcpy(filename, "vert.glsl", 10);
+
+    const char* vertSource = consolation_readFile(path);
     GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertShader, 1, &vertSource, NULL);
     glCompileShader(vertShader);
     glGetShaderiv(vertShader, GL_COMPILE_STATUS, &success);
+#ifdef CONSOLATION_DEBUG
     if(!success) {
         glGetShaderInfoLog(vertShader, 512, NULL, infoLog);
         printf("Vert shader compilation error: %s\n", infoLog);
     } else {
         printf("Vert shader compiled...\n");
     }
+#endif
 
-    const char* fragSource = consolation_readFile("../res/frag.glsl");
+    memcpy(filename, "frag.glsl", 10);
+
+    const char* fragSource = consolation_readFile(path);
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragShader, 1, &fragSource, NULL);
     glCompileShader(fragShader);
     glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
+#ifdef CONSOLATION_DEBUG
     if(!success) {
         glGetShaderInfoLog(fragShader, 512, NULL, infoLog);
         printf("Frag shader compilation error: %s\n", infoLog);
     } else {
         printf("Frag shader compiled...\n");
     }
+#endif
 
     window->shader = glCreateProgram();
     glAttachShader(window->shader, vertShader);
     glAttachShader(window->shader, fragShader);
     glLinkProgram(window->shader);
     glGetProgramiv(window->shader, GL_LINK_STATUS, &success);
+#ifdef CONSOLATION_DEBUG
     if(!success) {
         glGetProgramInfoLog(window->shader, 512, NULL, infoLog);
         printf("Shader linking error: %s\n", infoLog);
     } else {
         printf("Shader linked.\n");
     }
+#endif
 
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 
+    memcpy(filename, "atlas.png", 10);
+
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("../res/atlas.png", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
     glGenTextures(1, &window->font);
     glBindTexture(GL_TEXTURE_2D, window->font);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -129,6 +147,8 @@ static void initRendering(struct consolation_Window* window) {
     stbi_image_free(data);
 
     glUniform1i(glGetUniformLocation(window->shader, "uFont"), 0);
+
+    reallocate(path, 0);
 }
 
 void consolation_renderWindow(struct consolation_Window* window) {
@@ -165,13 +185,6 @@ void consolation_renderWindow(struct consolation_Window* window) {
             float top = (float)(charJ) * (70.0f / 800.0f) + 0.02f;
             float right = left + (60.0f / 1000.0f);
             float bottom = top + (70.0f / 800.0f);
-//            left = 0.530f;
-//            right = 0.580f;
-//            top = 230.0f / 800.0f;
-//            bottom = 290.0f / 800.0f;
-            if(c == 'h') {
-                printf("i: %d; j: %d\n",  charI, charJ);
-            }
 
             vertices[0].x = leftBound + (float)col * charWidth;
             vertices[0].y = topBound - (float)row * charHeight - charHeight;

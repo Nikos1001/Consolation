@@ -3,7 +3,7 @@ project(Consolation C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_library(Consolation consolation.h consolation.c file.h file.c font.h stb_image.h)
+add_library(Consolation consolation.h consolation.c file.h file.c stb_image.h)
 add_subdirectory(vendor/glfw)
 target_link_libraries(Consolation PRIVATE glfw)
 add_subdirectory(vendor/glew/build/cmake)
