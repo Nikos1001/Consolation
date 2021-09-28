@@ -47,6 +47,10 @@ int main() {
         for(int i = 30; i <= 36; i++)
             consolation_setFG(&window, i, 20, color);
 
+        for(int i = 3; i < 7; i++)
+            for(int j = 15; j < 20; j++)
+                consolation_setChar(&window, i, j, '#');
+
         consolation_renderWindow(&window);
 
     }

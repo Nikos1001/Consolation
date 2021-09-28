@@ -21,7 +21,7 @@ void main() {
     float sample = texture(uFont, vec2(uvX, uvY)).r;
     float scale = 1.0 / fwidth(sample);
     float signedDistance = (sample - 0.5) * scale;
-    float color = clamp(signedDistance + 0.9 + 2 * scale * clamp(pWeight, 0.01, 1.0), 0.0, 1.0);
+    float color = clamp(signedDistance + 0.3 + 2 * scale * clamp(pWeight, 0.01, 1.0), 0.0, 1.0);
     FragColor = mix(pBg, pFg, color);
 //    FragColor = vec3(pWeight, pWeight, pWeight);
 }
